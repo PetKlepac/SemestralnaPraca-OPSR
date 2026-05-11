@@ -161,3 +161,56 @@ def plot_control_comparison(t, u_lqr, u_mpc, d=None, title=None):
     fig.tight_layout()
 
     return fig
+
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+def plot_all_results(t, x_poloha, x_uhol, u, d=None, title=None):
+
+    fig, axs = plt.subplots(5, 1, figsize=(10, 12), sharex=True)
+
+    # 1. Porucha d
+    if d is not None:
+        axs[0].plot(t, d, color='orange', linestyle='--', linewidth=2, label='d')
+        axs[0].set_ylabel('Porucha d [N]')
+        axs[0].set_title('1. Vonkajšia porucha')
+        axs[0].grid(True)
+        axs[0].legend()
+
+    # 2. Riadiaca sila u
+    axs[1].plot(t, u, 'g', linewidth=2, label='u')
+    axs[1].set_ylabel('Riadiaca sila u [N]')
+    axs[1].set_title('2. Riadiaca sila')
+    axs[1].grid(True)
+    axs[1].legend()
+
+    # 3. Celková sila u + d
+    if d is not None:
+        total = u + d
+        axs[2].plot(t, total, 'k', linewidth=2, label='u + d')
+        axs[2].set_ylabel('Celková sila [N]')
+        axs[2].set_title('3. Celková sila pôsobiaca na vozík')
+        axs[2].grid(True)
+        axs[2].legend()
+
+    # 4. Poloha vozíka
+    axs[3].plot(t, x_poloha, 'b', linewidth=2, label='x')
+    axs[3].set_ylabel('Poloha x [m]')
+    axs[3].set_title('4. Poloha vozíka')
+    axs[3].grid(True)
+    axs[3].legend()
+
+    # 5. Uhol kyvadla
+    axs[4].plot(t, x_uhol, 'r', linewidth=2, label='θ')
+    axs[4].set_xlabel('Čas [s]')
+    axs[4].set_ylabel('Uhol θ [°]')
+    axs[4].set_title('5. Uhol kyvadla')
+    axs[4].grid(True)
+    axs[4].legend()
+
+    if title:
+        fig.suptitle(title, fontsize=14)
+
+    fig.tight_layout()
+    return fig

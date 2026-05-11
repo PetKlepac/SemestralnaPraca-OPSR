@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from semestralka.charts import plot_position, plot_angle, plot_control
+from semestralka.charts import plot_all_results
 from semestralka.lqr import lqr_control
 from semestralka.system import nonlinear_dynamics
 from semestralka.system import create_disturbance_array
@@ -66,9 +66,7 @@ d = d_array
 
 # ====================== GRAFY ======================
 if __name__ == "__main__":
-    plot_angle(t_grid, x_uhol, u=u, d=d)
-    plot_position(t_grid, x_poloha, u=u, d=d)
-    plot_control(t_grid, u, d)
+    plot_all_results(t=t_grid, x_poloha=x_poloha, x_uhol=x_uhol, u=u, d=d)
     plt.show()
 else:
     pass
