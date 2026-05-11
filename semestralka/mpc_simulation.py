@@ -1,42 +1,70 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import solve_ivp
-from semestralka.charts import create_charts
-from semestralka.mpc import non_lin_model_MPC
+from semestralka.charts import plot_position, plot_angle, plot_control
+from semestralka.mpc import mpc_control
+from semestralka.system import nonlinear_dynamics
+from semestralka.system import create_disturbance_array
 
 
-# ====================== RIEŠENIE ====================
+# ====================== PARAMETRE A PREMENNÉ ====================
 t_start = 0
 t_final = 10
-t_steps = 1000
+dt = 0.02
+t_grid = np.arange(t_start, t_final + dt, dt)
 
-x0 = [0.0, 0.0, np.pi + 0.0, 0.0]  # začiatok v hornej polohe + odchýlka
-
-disturbances = [
-    (1.0, 3.0, 0.5),   # začiatok 1.0s, sila 3N, trvanie 0.5s
-    (6.0, -1.5, 0.2),
-]
-
+x0 = [0.0, 0.0, np.pi + 0.3, 0.0]  # začiatok v hornej polohe + odchýlka
+x = x0.copy()                      # počiatočný krok
+x_history = []
 u_history = []
+
+
+# ====================== NASTAVENIE PORÚCH ====================
+disturbances = [
+    (2.0, 2.5, 3.0),   # začiatok 1.0s, sila 2.5N, trvanie 3.0s
+    (7.0, -1.0, 0.5),
+]
+d_array = create_disturbance_array(t_grid, disturbances, noise_max=0.0, seed=67)
+
+
+# ====================== SIMULÁCIA ====================
 
 print("Spúšťam simuláciu...")
 
-sol = solve_ivp(
-    fun=lambda t, y:
-    non_lin_model_MPC(t, y, disturbances=disturbances, u_history=u_history),
-    t_span=(0, t_final),
-    y0=x0,
-    t_eval=np.linspace(t_start, t_final, t_steps),
-    method='RK45',
-    rtol=1e-6,
-    atol=1e-8
-)
+for i, t in enumerate(t_grid):
+
+    # ===== MPC RIADENIE =====
+    u_mpc = mpc_control(x, t)
+
+    # ===== PRIDANIE PORUCHY =====
+    u_total = u_mpc + d_array[i]
+
+    # ===== ULOŽENIE DÁT =====
+    x_history.append(x.copy())
+    u_history.append(u_mpc)
+
+    # ===== DYNAMIKA SYSTÉMU =====
+    dxdt = nonlinear_dynamics(x, u_total)
+
+    # ===== INTEGRÁCIA POMOCOU EULERA =====
+    x = x + dt * dxdt
 
 print("Simulácia dokončená.")
 
-u_array = np.array(u_history[:len(sol.t)])
+
+# ====================== TVORBA GRAFOV ====================
+x_array = np.array(x_history)
+x_poloha = x_array[:, 0]
+x_uhol = x_array[:, 2] * 180 / np.pi
+
+u = np.array(u_history)
+d = d_array
 
 
-# ====================== VIZUALIZÁCIA ======================
-create_charts(sol, u_history=u_array, title='Simulácia nelineárneho modelu s MPC')
-plt.show()
+# ====================== GRAFY ======================
+if __name__ == "__main__":
+    plot_angle(t_grid, x_uhol, u=u, d=d)
+    plot_position(t_grid, x_poloha, u=u, d=d)
+    plot_control(t_grid, u, d)
+    plt.show()
+else:
+    pass
