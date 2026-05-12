@@ -4,6 +4,7 @@ from semestralka.charts import plot_all_results
 from semestralka.lqr import lqr_control
 from semestralka.system import nonlinear_dynamics
 from semestralka.system import create_disturbance_array
+from semestralka.visualization import pendulum_visualization
 
 
 # ====================== PARAMETRE A PREMENNÉ ====================
@@ -64,9 +65,15 @@ u = np.array(u_history)
 d = d_array
 
 
-# ====================== GRAFY ======================
+# ====================== GRAFY A VIZUALIZACE ======================
 if __name__ == "__main__":
     plot_all_results(t=t_grid, x_poloha=x_poloha, x_uhol=x_uhol, u=u, d=d)
     plt.show()
+    pendulum_visualization(
+        x_history=x_history,
+        t_grid=t_grid,
+        u_history=u_history,
+        d_array=d_array
+    )
 else:
     pass
