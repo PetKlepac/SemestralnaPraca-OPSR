@@ -52,7 +52,7 @@ for i, t in enumerate(t_grid):
 print("Simulácia dokončená.")
 
 
-# ====================== TVORBA GRAFOV ====================
+# ====================== VÝSLEDOK ====================
 x_array = np.array(x_history)
 x_poloha = x_array[:, 0]
 x_uhol = x_array[:, 2] * 180 / np.pi
